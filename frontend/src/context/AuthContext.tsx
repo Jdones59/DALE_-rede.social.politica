@@ -1,25 +1,41 @@
-import React, { createContext, useState } from 'react';
-import api from '../../pages/components/services/api';
+'use client';
+import { createContext, useContext, useState, useEffect } from "react";
+import Cookies from "js-cookie";
+import { loginUser, getProfile } from "@/services/auth.service";
 
-export const AuthContext = createContext<any>(null);
 
-export const AuthProvider = ({ children }: any) => {
-  const [user, setUser] = useState(null);
+const AuthContext = createContext<any>(null);
 
-  const login = async (realName: string, password: string) => {
-    const res = await api.post('/auth/login', { realName, password });
-    localStorage.setItem('token', res.data.token);
-    setUser(res.data.user);
-  };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    setUser(null);
-  };
+export function AuthProvider({ children }: any) {
+const [user, setUser] = useState(null);
 
-  return (
-    <AuthContext.Provider value={{ user, login, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
+
+useEffect(() => {
+const token = Cookies.get("token");
+if (token) getProfile().then(setUser);
+}, []);
+
+
+const login = async (email: string, password: string) => {
+const data = await loginUser(email, password);
+Cookies.set("token", data.token);
+setUser(data.user);
 };
+
+
+const logout = () => {
+Cookies.remove("token");
+setUser(null);
+};
+
+
+return (
+<AuthContext.Provider value={{ user, login, logout }}>
+{children}
+</AuthContext.Provider>
+);
+}
+
+
+export const useAuth = () => useContext(AuthContext);

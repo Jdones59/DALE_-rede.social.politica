@@ -7,20 +7,22 @@ import voteRoutes from "./modules/votes/vote.routes";
 import friendshipRoutes from "./modules/friendship/friendship.routes";
 import debateRoutes from "./modules/debates/debate.routes";
 
-
-
-
-
 const app = express();
 
+// Middlewares
 app.use(cors());
 app.use(express.json());
 
 // Rotas principais
-app.use("/laws", lawRoutes);
-app.use("/auth", authRoutes);
-app.use("/votes", voteRoutes);
-app.use("/friends", friendshipRoutes);
-app.use("/debates", debateRoutes);
+app.use("/api/laws", lawRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/votes", voteRoutes);
+app.use("/api/friends", friendshipRoutes);
+app.use("/api/debates", debateRoutes);
+
+// Health check para Render
+app.get("/", (req, res) => {
+  res.send("🔥 API rodando com sucesso!");
+});
 
 export default app;

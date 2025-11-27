@@ -1,0 +1,31 @@
+frontend/
+│   package.json
+│   next.config.js
+│   
+├── pages/
+│   ├── index.tsx
+│   ├── login.tsx
+│   ├── register.tsx
+│   ├── [id].tsx  ← página de leis
+│
+│   ├── debates/
+│   │      [id].tsx
+│
+│   └── api/     ← (se você precisar SSR)
+│
+├── components/
+│   │   Navbar.tsx
+│   │   LawCard.tsx
+│   │   CommentBox.tsx
+│   │   DebateInvite.tsx
+│   │   FriendButton.tsx
+│   │   VoteChart.tsx
+│   │
+│   └── services/
+│          api.ts
+│
+├── context/
+│     AuthContext.tsx
+│
+└── public/
+      (imagens, logos, ícones)

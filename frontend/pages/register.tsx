@@ -1,6 +1,6 @@
 // Similar to login.tsx but for register
 import React from 'react';
-import api from '../services/api';
+import api from '../components/services/api';
 import { useRouter } from 'next/router';
 
 const Register = () => {

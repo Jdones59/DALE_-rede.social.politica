@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { useRouter } from 'next/router';
-import api from '../../services/api';
-import { AuthContext } from '../../context/AuthContext';
+import api from '../components/services/api';
+import { AuthContext } from '../context/AuthContext';
 
 const Profile = () => {
   const router = useRouter();
