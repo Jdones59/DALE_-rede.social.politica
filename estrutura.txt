@@ -1,0 +1,85 @@
+/projeto-politica
+|
+├── backend/
+│ ├── src/
+│ │ ├── app.ts
+│ │ ├── server.ts
+│ │ ├── config/
+│ │ │ └── database.ts
+│ │ ├── modules/
+│ │ │ ├── users/
+│ │ │ │ ├── user.model.ts
+│ │ │ │ ├── user.service.ts
+│ │ │ │ ├── user.controller.ts
+│ │ │ │ ├── user.routes.ts
+│ │ │ ├── auth/
+│ │ │ │ ├── auth.service.ts
+│ │ │ │ ├── auth.controller.ts
+│ │ │ │ ├── auth.routes.ts
+│ │ │ ├── laws/
+│ │ │ │ ├── law.model.ts
+│ │ │ │ ├── law.service.ts
+│ │ │ │ ├── law.controller.ts
+│ │ │ │ ├── law.routes.ts
+│ │ │ ├── comments/
+│ │ │ │ ├── comment.model.ts
+│ │ │ │ ├── comment.service.ts
+│ │ │ │ ├── comment.controller.ts
+│ │ │ │ ├── comment.routes.ts
+│ │ │ ├── votes/
+│ │ │ │ ├── vote.model.ts
+│ │ │ │ ├── vote.service.ts
+│ │ │ │ ├── vote.controller.ts
+│ │ │ │ ├── vote.routes.ts
+│ │ │ ├── friendships/
+│ │ │ │ ├── friendship.model.ts
+│ │ │ │ ├── friendship.service.ts
+│ │ │ │ ├── friendship.controller.ts
+│ │ │ │ ├── friendship.routes.ts
+│ │ │ ├── debates/
+│ │ │ │ ├── debate.model.ts
+│ │ │ │ ├── debate.service.ts
+│ │ │ │ ├── debate.controller.ts
+│ │ │ │ ├── debate.routes.ts
+│ │ ├── crawler/
+│ │ │ └── laws_crawler.ts
+│ │ ├── jobs/
+│ │ │ └── update_laws_daily.ts
+│ │ ├── utils/
+│ │ │ ├── generateAnonName.ts
+│ │ │ ├── authMiddleware.ts
+│ │ │ ├── checkFriendship.ts
+│ │ │ ├── errorHandler.ts
+│ ├── Dockerfile
+│ ├── package.json
+│ ├── tsconfig.json
+│ └── .env
+│
+├── frontend/
+│ ├── public/
+│ ├── src/
+│ │ ├── pages/
+│ │ │ ├── index.tsx
+│ │ │ ├── login.tsx
+│ │ │ ├── register.tsx
+│ │ │ ├── perfil/[id].tsx
+│ │ │ ├── lei/[id].tsx
+│ │ │ ├── debates/[id].tsx
+│ │ ├── components/
+│ │ │ ├── Navbar.tsx
+│ │ │ ├── LawCard.tsx
+│ │ │ ├── CommentBox.tsx
+│ │ │ ├── VoteChart.tsx
+│ │ │ ├── FriendButton.tsx
+│ │ │ ├── DebateInvite.tsx
+│ │ ├── services/
+│ │ │ └── api.ts
+│ │ ├── context/
+│ │ │ └── AuthContext.tsx
+│ ├── Dockerfile
+│ ├── package.json
+│ └── next.config.js
+│
+├── docker-compose.yml
+├── README.md
+└── .env

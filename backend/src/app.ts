@@ -1,0 +1,26 @@
+import express from "express";
+import cors from "cors";
+
+import lawRoutes from "./modules/laws/law.routes";
+import authRoutes from "./modules/auth/auth.routes";
+import voteRoutes from "./modules/votes/vote.routes";
+import friendshipRoutes from "./modules/friendship/friendship.routes";
+import debateRoutes from "./modules/debates/debate.routes";
+
+
+
+
+
+const app = express();
+
+app.use(cors());
+app.use(express.json());
+
+// Rotas principais
+app.use("/laws", lawRoutes);
+app.use("/auth", authRoutes);
+app.use("/votes", voteRoutes);
+app.use("/friends", friendshipRoutes);
+app.use("/debates", debateRoutes);
+
+export default app;

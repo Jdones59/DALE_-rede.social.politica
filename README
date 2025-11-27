@@ -1,0 +1,16 @@
+# Projeto Política
+
+Um site político para discussão de leis, com anonimato, amizades e debates.
+
+## Estrutura
+- Backend: Node.js com Express e TypeScript
+- Frontend: Next.js
+- Banco: MongoDB
+- Containerização: Docker
+
+## Como rodar
+1. Instale Docker
+2. Rode `docker-compose up`
+
+Acesse o frontend em http://localhost:3000
+Backend em http://localhost:5000
