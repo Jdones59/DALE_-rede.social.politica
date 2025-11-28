@@ -1,10 +1,12 @@
-import express from 'express';
-import * as lawController from './law.controller';
-import { authMiddleware } from '../../utils/authMiddleware';
+// src/modules/laws/law.routes.ts
 
-const router = express.Router();
+import { Router } from "express";
+import { lawController } from "./law.controller";
 
-router.get('/', authMiddleware, lawController.getLaws);
-router.get('/:id', authMiddleware, lawController.getLaw);
+const router = Router();
+
+router.get("/", (req, res) => lawController.getAll(req, res));
+router.get("/:id", (req, res) => lawController.getById(req, res));
+router.post("/", (req, res) => lawController.create(req, res));
 
 export default router;

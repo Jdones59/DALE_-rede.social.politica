@@ -1,23 +1,18 @@
-# Imagem do Node
 FROM node:20
 
-# Diretório de trabalho
 WORKDIR /app
 
-# Copiar somente arquivos essenciais primeiro (cache)
-COPY package*.json ./
+# Copia SOMENTE os arquivos do BACKEND
+COPY backend/package*.json ./
 
-# Instalar dependências
 RUN npm install
 
-# Copiar o restante do projeto
-COPY . .
+# Copia todo o backend
+COPY backend/. .
 
-# Gerar a pasta dist (compilação do TypeScript)
+# Build do TypeScript
 RUN npm run build
 
-# Porta usada pelo backend
 EXPOSE 3000
 
-# Comando final
 CMD ["npm", "start"]

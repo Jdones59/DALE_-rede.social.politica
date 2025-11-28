@@ -1,26 +1,19 @@
-import { Request, Response } from "express";
-import { AuthService } from "./auth.service";
+import { Controller, Post, Body } from '@nestjs/common';
+import { AuthService } from './auth.service';
+import { RegisterDto } from './dto/register.dto';
+import { LoginDto } from './dto/login.dto';
 
-const service = new AuthService();
-
+@Controller('auth')
 export class AuthController {
-    async register(req: Request, res: Response) {
-        try {
-            const { name, email, password } = req.body;
-            const user = await service.register(name, email, password);
-            return res.json(user);
-        } catch (err: any) {
-            return res.status(400).json({ error: err.message });
-        }
-    }
+  constructor(private authService: AuthService) {}
 
-    async login(req: Request, res: Response) {
-        try {
-            const { email, password } = req.body;
-            const result = await service.login(email, password);
-            return res.json(result);
-        } catch (err: any) {
-            return res.status(400).json({ error: err.message });
-        }
-    }
+  @Post('register')
+  async register(@Body() dto: RegisterDto) {
+    return this.authService.register(dto);
+  }
+
+  @Post('login')
+  async login(@Body() dto: LoginDto) {
+    return this.authService.login(dto);
+  }
 }

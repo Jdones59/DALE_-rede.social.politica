@@ -1,12 +1,35 @@
-import { Controller, Post, Body } from '@nestjs/common';
-import { AuthService } from '../auth/auth.service';
+// src/modules/laws/law.controller.ts
 
-@Controller('auth')
-export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+import { Request, Response } from "express";
+import { lawService } from "./law.service";
 
-  @Post('login')
-  login(@Body() data: any) {
-    return this.authService.login(data);
-  }
+export class LawController {
+    async getAll(req: Request, res: Response) {
+        const laws = await lawService.getAll();
+        return res.json(laws);
+    }
+
+    async getById(req: Request, res: Response) {
+        const law = await lawService.getById(req.params.id);
+        if (!law) {
+            return res.status(404).json({ message: "Lei não encontrada" });
+        }
+        return res.json(law);
+    }
+
+    async create(req: Request, res: Response) {
+        const { title, number, year, description, url } = req.body;
+
+        const newLaw = await lawService.create({
+            title,
+            number,
+            year,
+            description,
+            url,
+        });
+
+        return res.status(201).json(newLaw);
+    }
 }
+
+export const lawController = new LawController();

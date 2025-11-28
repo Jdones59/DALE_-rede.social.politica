@@ -1,22 +1,28 @@
-import { Law } from './law.model';
+// src/modules/laws/law.service.ts
 
-export const getLaws = async (page: number, limit: number) => {
-  return Law.find().skip((page - 1) * limit).limit(limit);
-};
+import { Law } from "./law.model";
 
-export const getLawById = async (id: string) => {
-  return Law.findById(id);
-};
+export class LawService {
+    private laws: Law[] = []; // banco temporário (depois você coloca Prisma/Mongo)
 
-export const updateLaw = async (id: string, data: any) => {
-  return Law.findByIdAndUpdate(id, data, { new: true });
-};
+    async getAll(): Promise<Law[]> {
+        return this.laws;
+    }
 
-export const createOrUpdateLaw = async (data: any) => {
-  const existing = await Law.findOne({ number: data.number });
-  if (existing) {
-    return updateLaw(existing._id.toString(), data);
-  }
-  const law = new Law(data);
-  return law.save();
-};
+    async getById(id: string): Promise<Law | null> {
+        return this.laws.find((l) => l.id === id) || null;
+    }
+
+    async create(data: Omit<Law, "id" | "createdAt">): Promise<Law> {
+        const newLaw: Law = {
+            id: Date.now().toString(),
+            createdAt: new Date(),
+            ...data,
+        };
+
+        this.laws.push(newLaw);
+        return newLaw;
+    }
+}
+
+export const lawService = new LawService();

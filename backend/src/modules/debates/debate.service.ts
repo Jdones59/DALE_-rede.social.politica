@@ -1,4 +1,4 @@
-import { Debate } from './debates.model';
+import { Debate } from './debate.module';
 
 export const createDebate = async (user1Id: string, user2Id: string, lawId?: string, theme?: string) => {
   const debate = new Debate({ user1: user1Id, user2: user2Id, law: lawId, theme });

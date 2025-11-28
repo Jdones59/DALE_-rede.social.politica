@@ -1,11 +1,19 @@
-import express from 'express';
-import * as userController from './user.controller';
-import { authMiddleware } from '../../utils/authMiddleware';
+import { Module } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
+import { AuthService } from './auth.service';
+import { AuthController } from './auth.controller';
+import { PrismaService } from '../../database/prisma.service';
+import { JwtStrategy } from './jwt.strategy';
 
-const router = express.Router();
-
-router.get('/me', authMiddleware, userController.getMe);
-router.put('/perfil', authMiddleware, userController.updateProfile);
-router.get('/user/:id', authMiddleware, userController.getUser);
-
-export default router;
+@Module({
+  imports: [
+    JwtModule.register({
+      secret: process.env.JWT_SECRET || 'default_secret',
+      signOptions: { expiresIn: '1d' },
+    }),
+  ],
+  controllers: [AuthController],
+  providers: [AuthService, PrismaService, JwtStrategy],
+  exports: [AuthService],
+})
+export class AuthModule {}

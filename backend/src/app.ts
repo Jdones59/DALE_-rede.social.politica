@@ -20,7 +20,7 @@ app.use("/api/votes", voteRoutes);
 app.use("/api/friends", friendshipRoutes);
 app.use("/api/debates", debateRoutes);
 
-// Health check para Render
+// Health check
 app.get("/", (req, res) => {
   res.send("🔥 API rodando com sucesso!");
 });
