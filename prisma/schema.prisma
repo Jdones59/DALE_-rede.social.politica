@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         Int       @id @default(autoincrement())
+  email      String    @unique
+  password   String
+  name       String?
+  createdAt  DateTime  @default(now())
+  comments   Comment[]
+  votes      Vote[]
+}
+
+model Law {
+  id          Int       @id @default(autoincrement())
+  externalId  String?   // opcional: ID do site externo
+  title       String
+  description String?
+  createdAt   DateTime  @default(now())
+  comments    Comment[]
+  votes       Vote[]
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  Int
+  law       Law      @relation(fields: [lawId], references: [id])
+  lawId     Int
+  createdAt DateTime @default(now())
+}
+
+model Vote {
+  id       Int    @id @default(autoincrement())
+  value    Int    // 1 (upvote) ou -1 (downvote)
+  user     User   @relation(fields: [userId], references: [id])
+  userId   Int
+  law      Law    @relation(fields: [lawId], references: [id])
+  lawId    Int
+
+  @@unique([userId, lawId])
+}
