@@ -1,0 +1,38 @@
+name: CI — Backup Restore Verification
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  restore-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Start Postgres service
+        run: |
+          docker-compose up -d postgres
+          sleep 3
+
+      - name: Prepare DB with sample data
+        run: |
+          # create a simple table and insert a row
+          docker exec -t dale_db sh -c "psql -U ${POSTGRES_USER:-joao} -d ${POSTGRES_DB:-dale_db} -c \"CREATE TABLE IF NOT EXISTS ci_test(id serial primary key, name text); INSERT INTO ci_test(name) VALUES('restore-test');\""
+
+      - name: Dump DB to file inside container
+        run: |
+          docker exec -t dale_db sh -c "pg_dump -U ${POSTGRES_USER:-joao} -Fc ${POSTGRES_DB:-dale_db} -f /tmp/ci-dump.dump"
+
+      - name: Copy dump to host
+        run: docker cp dale_db:/tmp/ci-dump.dump ./backend/backups/ci-dump.dump
+
+      - name: Drop and recreate DB then restore from dump
+        run: |
+          # drop and create a fresh database for restore verification
+          docker exec -t dale_db sh -c "psql -U ${POSTGRES_USER:-joao} -c \"DROP DATABASE IF EXISTS verify_restore; CREATE DATABASE verify_restore;\""
+          docker exec -i dale_db pg_restore -U ${POSTGRES_USER:-joao} -d verify_restore -c /tmp/ci-dump.dump
+
+      - name: Verify restored data exists
+        run: |
+          docker exec -t dale_db sh -c "psql -U ${POSTGRES_USER:-joao} -d verify_restore -t -c \"SELECT count(*) FROM ci_test WHERE name = 'restore-test';\""
