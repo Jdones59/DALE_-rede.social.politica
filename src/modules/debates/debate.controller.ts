@@ -17,7 +17,7 @@ export const addArgument = async (req: Request, res: Response) => {
 };
 
 export const vote = async (req: Request, res: Response) => {
-  const debate = await debateService.votePublic(req.params.id, req.body.voteForUser1);
+  const debate = await debateService.votePublic(req.params.id, (req as any).user.id, req.body.voteForUser1);
   res.json(debate);
 };
 

@@ -1,24 +1,8 @@
-import { config } from "dotenv";
-config();
-
-import mongoose from "mongoose";
 import app from "./app";
 
-async function startServer() {
-  try {
-    await mongoose.connect(process.env.MONGO_URI as string);
-    console.log("📦 MongoDB conectado com sucesso!");
+// Server entrypoint should import the central `app` (defined in src/app.ts)
+// Keep the API server on PORT 4000 by default (frontend runs on 3000).
+// docker-compose sets PORT=3001 for the backend in this repo, so choose 3001 as default.
+const PORT = process.env.PORT ? Number(process.env.PORT) : 3001;
 
-    const port = process.env.PORT || 3000;
-
-    app.listen(port, () => {
-      console.log(`🚀 Servidor rodando na porta ${port}`);
-    });
-
-  } catch (err) {
-    console.error("❌ Erro na inicialização:", err);
-    process.exit(1);
-  }
-}
-
-startServer();
+app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));

@@ -1,18 +1,18 @@
-FROM node:20
+FROM node:18
 
-WORKDIR /app
+WORKDIR /usr/src/app
 
-# Copia SOMENTE os arquivos do BACKEND
-COPY backend/package*.json ./
+# Copiar dependências primeiro
+COPY package.json package-lock.json ./
 
 RUN npm install
 
-# Copia todo o backend
-COPY backend/. .
+# Copiar o restante dos arquivos
+COPY . .
 
 # Build do TypeScript
 RUN npm run build
 
-EXPOSE 3000
+EXPOSE 3001
 
 CMD ["npm", "start"]

@@ -1,6 +1,6 @@
 import express from 'express';
 import * as friendshipController from './friendship.controller';
-import { authMiddleware } from '../../utils/authMiddleware';
+import authMiddleware from '../../utils/authMiddleware';
 
 const router = express.Router();
 

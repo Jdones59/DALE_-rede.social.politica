@@ -1,0 +1,111 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum DebateStatus {
+  pending
+  active
+  closed
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+
+  comments   Comment[]
+  // Relation to debates as user1 and as user2
+  debatesAsUser1    Debate[] @relation("DebateUser1")
+  debatesAsUser2    Debate[] @relation("DebateUser2")
+  votes      Vote[]
+  friendshipsSent     Friendship[] @relation("FriendshipSender")
+  friendshipsReceived Friendship[] @relation("FriendshipReceiver")
+}
+
+model Law {
+  id          Int      @id @default(autoincrement())
+  number      String
+  title       String
+  summary     String
+  publishedAt DateTime
+  url         String
+  createdAt   DateTime @default(now())
+
+  debates Debate[]
+  comments Comment[]
+}
+
+model Debate {
+  id        Int      @id @default(autoincrement())
+  content   String
+  createdAt DateTime @default(now())
+
+  status DebateStatus @default(pending)
+
+  user1Id Int
+  user1   User @relation("DebateUser1", fields: [user1Id], references: [id])
+
+  user2Id Int?
+  user2   User? @relation("DebateUser2", fields: [user2Id], references: [id])
+
+  lawId Int
+  law   Law  @relation(fields: [lawId], references: [id])
+
+  comments Comment[]
+  // arguments stored as arrays (user1 / user2)
+  argumentsUser1 String[] @default([])
+  argumentsUser2 String[] @default([])
+  publicVotesUser1 Int @default(0)
+  publicVotesUser2 Int @default(0)
+  votes    Vote[]
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String
+  createdAt DateTime @default(now())
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+  debateId Int?
+  debate   Debate? @relation(fields: [debateId], references: [id])
+
+  lawId Int?
+  law   Law? @relation(fields: [lawId], references: [id])
+}
+
+model Vote {
+  id        Int      @id @default(autoincrement())
+  value     Int      // 1 = like, -1 = dislike (você pode validar na lógica)
+  createdAt DateTime @default(now())
+
+  userId Int
+  user   User   @relation(fields: [userId], references: [id])
+
+  debateId Int
+  debate   Debate @relation(fields: [debateId], references: [id])
+
+  @@unique([userId, debateId]) // 1 user só vota 1x por debate
+}
+
+model Friendship {
+  id Int @id @default(autoincrement())
+
+  senderId Int
+  sender   User @relation("FriendshipSender", fields: [senderId], references: [id])
+
+  receiverId Int
+  receiver   User @relation("FriendshipReceiver", fields: [receiverId], references: [id])
+
+  status    String   @default("pending") // pending, accepted, blocked
+  createdAt DateTime @default(now())
+
+  @@unique([senderId, receiverId])
+}

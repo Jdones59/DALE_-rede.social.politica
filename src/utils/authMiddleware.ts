@@ -1,21 +1,44 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
-export function authMiddleware(
+export default function authMiddleware(
   req: Request & { user?: any },
   res: Response,
   next: NextFunction
 ) {
-  const token = req.headers.authorization?.replace("Bearer ", "");
-
-  if (!token)
-    return res.status(401).json({ error: "Token não fornecido." });
-
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader) {
+      return res.status(401).json({ error: "Token não fornecido." });
+    }
+
+    // Esperado: "Bearer TOKENAQUI"
+    const [type, token] = authHeader.split(" ");
+
+    if (type !== "Bearer" || !token) {
+    return res.status(401).json({ error: "Formato do token inválido." });
+    }
+
+    const secret = process.env.JWT_SECRET;
+
+    if (!secret) {
+      console.error("❌ ERRO: JWT_SECRET não foi definido no .env!");
+      return res.status(500).json({
+        error: "Erro interno: JWT_SECRET ausente no backend.",
+      });
+    }
+
+    const decoded = jwt.verify(token, secret);
+
     req.user = decoded;
-    next();
-  } catch {
+
+    return next();
+  } catch (err: any) {
+    if (err.name === "TokenExpiredError") {
+      return res.status(401).json({ error: "Token expirado." });
+    }
+
     return res.status(401).json({ error: "Token inválido." });
   }
 }

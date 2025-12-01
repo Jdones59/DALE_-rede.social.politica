@@ -1,26 +1,45 @@
-import { Friendship } from './friendship.model';
-import { User } from '../users/user.model';
+import prisma from '../../config/prismaClient';
 
-export const sendRequest = async (requesterId: string, receiverId: string) => {
-  const friendship = new Friendship({ requester: requesterId, receiver: receiverId });
-  await friendship.save();
+// Use Prisma-backed Friendship management. The Prisma model stores senderId / receiverId
+export const sendRequest = async (requesterId: string | number, receiverId: string | number) => {
+  const senderId = Number(requesterId);
+  const receiver = Number(receiverId);
+
+  const exists = await prisma.friendship.findFirst({
+    where: {
+      OR: [
+        { senderId, receiverId: receiver },
+        { senderId: receiver, receiverId: senderId },
+      ],
+    },
+  });
+
+  if (exists) return exists; // already exists
+
+  return prisma.friendship.create({ data: { senderId, receiverId: receiver, status: 'pending' } });
+};
+
+export const accept = async (id: string | number) => {
+  const iid = Number(id);
+  const friendship = await prisma.friendship.update({ where: { id: iid }, data: { status: 'accepted' } });
   return friendship;
 };
 
-export const accept = async (id: string) => {
-  const friendship = await Friendship.findByIdAndUpdate(id, { status: 'accepted' }, { new: true });
-  if (friendship) {
-    await User.findByIdAndUpdate(friendship.requester, { $addToSet: { friends: friendship.receiver } });
-    await User.findByIdAndUpdate(friendship.receiver, { $addToSet: { friends: friendship.requester } });
-  }
-  return friendship;
+export const reject = async (id: string | number) => {
+  const iid = Number(id);
+  return prisma.friendship.update({ where: { id: iid }, data: { status: 'rejected' } });
 };
 
-export const reject = async (id: string) => {
-  return Friendship.findByIdAndUpdate(id, { status: 'rejected' }, { new: true });
-};
+export const getFriends = async (userId: string | number) => {
+  const uid = Number(userId);
+  const friendships = await prisma.friendship.findMany({
+    where: { status: 'accepted', OR: [{ senderId: uid }, { receiverId: uid }] },
+  });
 
-export const getFriends = async (userId: string) => {
-  const user = await User.findById(userId).populate('friends');
-  return user?.friends;
+  const friendIds = friendships.map((f: any) => (f.senderId === uid ? f.receiverId : f.senderId));
+
+  if (friendIds.length === 0) return [];
+
+  const users = await prisma.user.findMany({ where: { id: { in: friendIds } }, select: { id: true, name: true, email: true, createdAt: true } });
+  return users;
 };

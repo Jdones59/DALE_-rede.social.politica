@@ -1,5 +1,14 @@
-import { User } from "./user.model";
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
+import crypto from 'crypto';
+
+// Minimal User type for the in-memory user service
+interface User {
+  id: string | number;
+  name: string;
+  email: string;
+  password: string;
+  createdAt: Date;
+}
 
 class UserService {
   private users: User[] = [];
@@ -23,11 +32,24 @@ class UserService {
   }
 
   findById(id: string) {
-    return this.users.find(u => u.id === id);
+    return this.users.find(u => String(u.id) === String(id));
   }
 
   getAll() {
     return this.users;
+  }
+
+  // update profile fields (simple in-memory impl)
+  updateProfile(id: string | number, data: { name?: string }) {
+    const uid = String(id);
+    const user = this.users.find(u => String(u.id) === uid);
+    if (!user) return null;
+    if (data.name !== undefined) user.name = data.name;
+    return user;
+  }
+
+  listAll() {
+    return this.getAll();
   }
 }
 

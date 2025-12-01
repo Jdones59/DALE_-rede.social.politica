@@ -1,10 +1,12 @@
-import express from 'express';
-import * as commentController from './comment.controller';
-import { authMiddleware } from '../../utils/authMiddleware';
+import { Router } from 'express';
+import { CommentController } from './comment.controller';
 
-const router = express.Router();
 
-router.post('/', authMiddleware, commentController.createComment);
-router.get('/laws/:id/comments', authMiddleware, commentController.getComments);
+const router = Router();
+const controller = new (CommentController as any)();
+
+
+router.get('/law/:lawId', (req, res) => controller.list(req.params.lawId).then((r: any) => res.json(r)));
+
 
 export default router;

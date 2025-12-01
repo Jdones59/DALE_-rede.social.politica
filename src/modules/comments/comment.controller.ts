@@ -1,12 +1,29 @@
-import { Request, Response } from 'express';
-import * as commentService from './comment.service';
+import { Controller, Post, Body, Param, Delete, Get, Req, UseGuards } from '@nestjs/common';
+import { CommentService } from './comment.service';
+import { JwtAuthGuard } from '../auth/jwt.guard';
 
-export const createComment = async (req: Request, res: Response) => {
-  const comment = await commentService.createComment(req.body.lawId, (req as any).user.id, req.body.text);
-  res.status(201).json(comment);
-};
 
-export const getComments = async (req: Request, res: Response) => {
-  const comments = await commentService.getCommentsForLaw(req.params.id, (req as any).user.id);
-  res.json(comments);
-};
+@Controller('comments')
+export class CommentController {
+constructor(private readonly service: CommentService) {}
+
+
+@UseGuards(JwtAuthGuard)
+@Post(':lawId')
+create(@Req() req: any, @Param('lawId') lawId: string, @Body('content') content: string) {
+	return this.service.createComment(req.user.id, lawId, content);
+}
+
+
+@UseGuards(JwtAuthGuard)
+@Delete(':id')
+delete(@Req() req: any, @Param('id') id: string) {
+	return this.service.deleteComment(req.user.id, id);
+}
+
+
+@Get('law/:lawId')
+list(@Param('lawId') lawId: string) {
+return this.service.listCommentsByLaw(lawId);
+}
+}
