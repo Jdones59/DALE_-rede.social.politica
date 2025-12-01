@@ -1,4 +1,4 @@
--- Migration: add debate fields from old mongoose model
+-- Migration: add debate fields (converted from previous schema)
 
 -- Rename userId -> user1Id
 ALTER TABLE "Debate" RENAME COLUMN "userId" TO "user1Id";

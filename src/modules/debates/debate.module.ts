@@ -1,5 +1,5 @@
 // debates module was converted to use Prisma.
-// The old Mongoose model has been removed – service now uses `src/config/prismaClient.ts`.
-// Left as a lightweight placeholder for compatibility.
+// Legacy model removed — service now uses `src/config/prismaClient.ts`.
+// File kept as a minimal placeholder for compatibility with other modules.
 
 export const __DEPRECATED__ = true;
