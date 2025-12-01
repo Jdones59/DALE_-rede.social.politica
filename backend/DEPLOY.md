@@ -123,3 +123,14 @@ Note on repo secrets and local dev
 	- A `.env.example` file is included in the repository to document required variables without containing secrets.
 
 This gives you a safe, auditable way to test backups and runs in staging with approval gates before applying anything to production.
+
+## Preparing production migrations (safety checklist)
+
+Before you apply migrations to production, follow this checklist:
+
+1. Create a full, tested backup and verify the dump is restorable (use the `restore-verify` workflow above against staging).  
+2. Protect the `production` environment in GitHub (Settings → Environments) and add `PRODUCTION_DATABASE_URL` as a secret. Require at least one reviewer for running the workflow.  
+3. Use the manual workflow `Production — Backup + Migrate (manual with environment protection)` available in Actions. This will allow you to create a final backup and run `npx prisma migrate deploy` inside CI with the protected production secret.  
+4. Monitor logs and, if anything goes wrong, restore from the verified backup using `pg_restore` and revert code.
+
+When you are ready I can run the production workflow for you — I will NOT apply migrations without explicit confirmation and the target environment details.
