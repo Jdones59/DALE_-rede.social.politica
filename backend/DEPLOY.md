@@ -105,3 +105,15 @@ Bash (CI job):
 ```
 
 Make sure the CI runner has docker (and docker-compose if you rely on services from docker-compose) available and that container names align with the Compose file.
+
+## Staging environment setup (recommended)
+
+This repo includes a staging workflow that targets a protected `staging` environment in GitHub Actions (`.github/workflows/staging-backup-and-migrate.yml`).
+
+To configure it:
+
+1. In your repository settings -> Environments, create an environment named `staging` and configure required reviewers to protect it (this will require manual approval before the job runs).
+2. Add a repository secret `STAGING_DATABASE_URL` with the staging database connection string.
+3. When you run the workflow, choose whether to run migrations after backup. Manual approval is required to use the `staging` environment if you protected it.
+
+This gives you a safe, auditable way to test backups and runs in staging with approval gates before applying anything to production.
