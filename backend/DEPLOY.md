@@ -116,4 +116,10 @@ To configure it:
 2. Add a repository secret `STAGING_DATABASE_URL` with the staging database connection string.
 3. When you run the workflow, choose whether to run migrations after backup. Manual approval is required to use the `staging` environment if you protected it.
 
+Note on repo secrets and local dev
+- Do NOT store secrets directly in `docker-compose.yml` or committed `.env` files. Instead:
+	- Use a `.env` file locally (add sensitive values to `.env`) and ensure `.env` is in `.gitignore`.
+	- In CI/staging/production use repository Secrets (Settings → Secrets) and reference them from workflows.
+	- A `.env.example` file is included in the repository to document required variables without containing secrets.
+
 This gives you a safe, auditable way to test backups and runs in staging with approval gates before applying anything to production.

@@ -1,30 +1,38 @@
-version: '3.8'
-
 services:
-  mongo:
-    image: mongo:latest
+  postgres:
+    image: postgres:15
+    container_name: dale_db
+    restart: always
+    environment:
+      # Read credentials from environment or .env — do NOT commit secrets to git
+      POSTGRES_USER: ${POSTGRES_USER:-joao}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      POSTGRES_DB: ${POSTGRES_DB:-dale_db}
     ports:
-      - '27017:27017'
+      - "5432:5432"
     volumes:
-      - mongo-data:/data/db
+      - postgres_data:/var/lib/postgresql/data
 
   backend:
-    build: ./backend
-    ports:
-      - '5000:5000'
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: dale_backend
     depends_on:
-      - mongo
-    env_file:
-      - .env
+      - postgres
     environment:
-      MONGO_URI: mongodb://mongo:27017/political_db
-
-  frontend:
-    build: ./frontend
+      # Prefer providing a DATABASE_URL via environment or .env for production/staging.
+      # Example value format: postgresql://user:pass@postgres:5432/dale_db?schema=public
+      DATABASE_URL: ${DATABASE_URL}
+      PORT: 3001
     ports:
-      - '3000:3000'
-    depends_on:
-      - backend
+      - "3001:3001"
+    volumes:
+      - ./backend:/usr/src/app
+      # keep container node_modules isolated (avoid host-native binaries causing crashes)
+      - /usr/src/app/node_modules
+    working_dir: /usr/src/app
+    command: sh -c "npx prisma generate && npx prisma migrate deploy && npm start"
 
 volumes:
-  mongo-data:
+  postgres_data:
