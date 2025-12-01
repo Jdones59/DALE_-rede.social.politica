@@ -1,0 +1,107 @@
+# Deployment / Migration Guide (Backend)
+
+This document explains safe steps to deploy the backend and apply Prisma migrations in a production environment.
+
+IMPORTANT: Always backup your database before applying migrations in prod.
+
+## 1) Backup database (Postgres example)
+
+Replace DB_HOST, DB_PORT, DB_NAME, DB_USER with your environment values.
+
+```powershell
+# Dump an SQL backup to file
+pg_dump -h $DB_HOST -p $DB_PORT -U $DB_USER -Fc -f ./backups/dale-$(date -u +%Y%m%d%H%M%S).dump $DB_NAME
+```
+
+Or using docker:
+
+```powershell
+docker exec -t your_db_container pg_dump -U $DB_USER -Fc $DB_NAME > dale-backup-$(date -u +%Y%m%d%H%M%S).dump
+```
+
+## 2) Prepare the application on the server
+
+- Make sure code is pulled from the correct branch.
+- Ensure `.env` is correctly set (DATABASE_URL, JWT_SECRET, etc.)
+
+## 3) Regenerate Prisma client & run migrations in **Production**
+
+On the server (or CI), after pulling changes and ensuring `.env` points to the production DB and you made a backup, run:
+
+```powershell
+# install deps if needed
+npm ci
+# run database migrations (safe for production)
+npm run prisma:migrate:prod
+# regenerate client
+npm run prisma:generate
+# restart service (systemd, pm2, docker, etc.)
+# example with pm2
+pm run build
+pm stop your-app || true
+pm run start
+```
+
+> Note: `prisma migrate deploy` applies already-created migrations; it will not create new development-only ones. Make sure migrations in `migrations/` are the ones you want to run in prod.
+
+## 4) Rollback guidelines
+
+If a migration fails or you need to rollback a schema change, restore from the backup created in step 1 (e.g. `pg_restore`), and revert the code (checkout previous tag/commit) and restart services.
+
+---
+
+If you want I can create a GitHub Pull Request with these changes and prepare a release branch. I can also run `prisma migrate deploy` on a supplied remote environment if you grant me access/le me know the deployment environment (or run the commands yourself by copy-pasting the steps above).
+
+## Local helper: backup + (optional) migrate script
+
+To make safe backups and optionally run migrations locally using docker containers, the repository contains a helper script:
+
+	backend/scripts/backup_and_migrate.ps1
+
+This PowerShell script will:
+- Create a compressed dump inside the `dale_db` container and copy it into `backend/backups/` with a timestamp
+- Optionally run `npx prisma migrate deploy` and `npx prisma generate` inside the `dale_backend` container when you ask for it
+- Remove old backup files older than a configurable number of days (defaults to 30)
+
+Example usage (PowerShell):
+
+```powershell
+# create a timestamped backup only
+./backend/scripts/backup_and_migrate.ps1
+
+# create backup and apply migrations (will prompt for confirmation)
+./backend/scripts/backup_and_migrate.ps1 -RunMigrations
+```
+
+Note: this helper uses docker/docker-compose so you do not need a host-side `pg_dump` client to create backups.
+
+## CI / automation-friendly scripts
+
+Two scripts are provided to make backups and optionally run migrations in CI pipelines (non-interactive):
+
+- `backend/scripts/backup_and_migrate_ci.ps1` — PowerShell script friendly for Windows agents and GitHub Actions running Windows runners.
+- `backend/scripts/backup_and_migrate_ci.sh` — Bash script for Linux-based runners.
+
+Both scripts perform a compressed pg_dump inside the Postgres container and copy the dump to `backend/backups/`, then (optionally) apply migrations in the backend container.
+
+Examples (non-interactive):
+
+PowerShell (CI job):
+```powershell
+# create backup only
+./backend/scripts/backup_and_migrate_ci.ps1
+
+# create backup and run migrations
+./backend/scripts/backup_and_migrate_ci.ps1 -RunMigrations
+```
+
+Bash (CI job):
+```bash
+# create backup only
+./backend/scripts/backup_and_migrate_ci.sh
+
+# create backup + migrations
+./backend/scripts/backup_and_migrate_ci.sh --run-migrations
+```
+
+Make sure the CI runner has docker (and docker-compose if you rely on services from docker-compose) available and that container names align with the Compose file.

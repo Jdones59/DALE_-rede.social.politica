@@ -1,0 +1,22 @@
+name: Backup and Apply Migrations (Linux)
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  backup-and-migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Docker Compose
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-compose-plugin
+
+      - name: Start Postgres via docker-compose
+        run: docker-compose up -d postgres
+
+      - name: Run backup and migrations (bash)
+        run: ./backend/scripts/backup_and_migrate_ci.sh --run-migrations
