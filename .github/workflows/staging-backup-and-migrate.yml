@@ -1,0 +1,33 @@
+name: Staging — Backup & Migrate (protected)
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_migrations:
+        description: 'Also apply migrations after backup?'
+        required: false
+        default: 'false'
+
+jobs:
+  staging-backup-and-migrate:
+    name: Staging backup & migrate
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create .env from secrets
+        run: |
+          echo "DATABASE_URL=${{ secrets.STAGING_DATABASE_URL }}" > backend/.env
+
+      - name: Start services
+        run: docker-compose up -d postgres
+
+      - name: Run backup (CI script)
+        run: ./backend/scripts/backup_and_migrate_ci.sh ${{ github.event.inputs.run_migrations == 'true' && echo '--run-migrations' || echo '' }}
+
+      - name: Smoke test - backend
+        run: |
+          sleep 2
+          curl -fS "http://localhost:3001/leis?page=1&perPage=1"
